@@ -2,7 +2,6 @@ const inquirer = require('inquirer');
 const express = require('express');
 const connection = require('./db/connection');
 const cTable = require('console.table')
-
 // required external npm modules/files
 
 
@@ -10,13 +9,21 @@ const app = express();
 
 app.use(express.json());
 
+// Show roles, departments, employees tables functions for printing from the database using select * in the console.
 const showRoles = () => {
-  connection.promise().query(`SELECT * FROM roles`).then((results) => console.table(`\n`, results[0], `\n\n\n\n\n\n`))
-  startPrompt();  
+  connection.promise().query(`SELECT * FROM roles`).then((results) => console.table(`\n`, results[0], `\n\n\n\n\n\n`));
+}
+
+const showDepartments = () => {
+  connection.promise().query(`SELECT * FROM department`).then((results) => console.table(`\n`, results[0], `\n\n\n\n\n\n`))
+}
+
+const showEmployees = () => {
+  connection.promise().query(`SELECT * FROM employees`).then((results) => console.table(`\n`, results[0], `\n\n\n\n\n\n`))
 }
 
 
-//new member function, runs on start.  Prompts to answer what type of employee.  Depending on answer, fires off a function, for each employee type, or creates HTML with answers stored in the array if answer is 'no' they do not want to add another employee.  
+//Initial prompt for firing off other functions for showing all three tables and firing off functions for creating new portions of those tables.  
 function startPrompt() {
   inquirer.prompt([
     {
@@ -29,24 +36,25 @@ function startPrompt() {
       switch (choice.form) {
         case 'Show Roles':
           showRoles();
+          startPrompt();  
          break;
         case 'Show Departments':
-          console.table(department)
-          startPrompt();
+          showDepartments();
+          startPrompt();  
           break;
         case 'Show Employees':
-          console.table(employees)
-          startPrompt();
+          showEmployees();
+          startPrompt();  
           break;
         case 'Add Role':
           createRole();
           console.log('Using create Role function.');
           break;
-        case 'Department':
+        case 'Add Department':
           createDepartment();
           console.log('Using create Department function.');
           break;
-        case 'Employee':
+        case 'Add Employee':
           createEmployee();
           console.log('Using create Employee function.');
           break;
@@ -57,7 +65,7 @@ function startPrompt() {
 
 }
 
-//create manager function includes manager specific employee question then pushes 'newManager' answers to myTeam array. startPrompt() added to refire/loop into the origin function for continuing to add employees to myTeam array.
+//create ROle function.  Takes in Roles Title and Roles Salary data and assignes a unique ID for each role.  Restarts the initial prompt when complete and.   
 const createRole = () => {
   inquirer
     .prompt([
@@ -72,130 +80,56 @@ const createRole = () => {
         message: "What is the pay for this role? (example: 100000)",
       }, 
     ]).then((answers) => {
-      connection.promise().query(`INSERT INTO roles (roles_title, roles_salary)
-      VALUES (?, ?)`, ([answers.roles_title, answers.roles_salary])).then(startPrompt())
+      connection.promise().query(`INSERT INTO roles (roles_title, roles_salary) VALUES (?, ?)`, ([answers.roles_title, answers.roles_salary])).then(startPrompt())
     });
 
-}  
-// connection.promise().query(`SELECT * FROM roles`).then((results) => console.table(`\n`, results[0], `\n\n\n\n\n\n`))
-      // app.post('/db/seeds', ({ body }, res) => {
-      //   const sql = `INSERT INTO roles (roles_title, roles_salary)
-      //     VALUES (?)`;
-      //   const param1 = [body.roles_title];
-      //   const param2 = [body.roles_salary];
-        
-      //   connection.query(sql, param1, param2, (err, result) => {
-      //     if (err) {
-      //       res.status(400).json({ error: err.message });
-      //       return;
-      //     }
-      //     res.json({
-      //       message: 'success',
-      //       data: body
-      //     });
-        // });
-
-
-    // });
-    // .then((data) => {
-    //   const filename = `${data.name.toLowerCase().split(' ').join('')}.json`;
-  
-    //   fs.writeFile(filename, JSON.stringify(data, null, '\t'), (err) =>
-    //     err ? console.log(err) : console.log('Success!')
-    //   );
-    // });
-
-    
-
+} 
  
-// //create manager function includes Engineer specific employee question then pushes 'newEngineer' answers to myTeam array. startPrompt() added to refire/loop into the origin function for continuing to add employees to myTeam array.
-// const createDepartment = () => {
-//   inquirer
-//     .prompt([
-//       {
-//         type: 'input',
-//         name: "dept_name",
-//         message: "What is the department's name?",
-//       },
- 
-//     ]).then((answers) => {
-//       app.post('/api/new-movie', ({ body }, res) => {
-//         const sql = `INSERT INTO roles (dept_name)
-//           VALUES (?)`;
-//         const param1 = [body.dept_name];
-        
-//         connection.query(sql, param1, (err, result) => {
-//           if (err) {
-//             res.status(400).json({ error: err.message });
-//             return;
-//           }
-//           res.json({
-//             message: 'success',
-//             data: body
-//           });
-//         });
-//       });
-//       startPrompt();
-//     });
-// }
+//Creates a department requesting only the name of that department and assigning a unique ID. Restarts the initial prompt when complete and.
+const createDepartment = () => {
+  inquirer
+    .prompt([
+      {
+        type: 'input',
+        name: "dept_name",
+        message: "What is the department's name?",
+      },
+    ]).then((answers) => {
+      connection.promise().query(`INSERT INTO department (dept_name) VALUES (?)`, ([answers.dept_name])).then(startPrompt())
+    });
+}
 
-// //create manager function includes Intern specific employee question then pushes 'newIntern' answers to myTeam array. startPrompt() added to refire/loop into the origin function for continuing to add employees to myTeam array.
-// const createEmployee = () => {
-//   inquirer
-//     .prompt([
-//       {
-//         type: 'input',
-//         name: "first_name",
-//         message: "What is the employee's first name?",
-//       },
-//       {
-//         type: 'input',
-//         name: "last_name",
-//         message: "What is the employee's last name?",
-//       },
-//       {
-//         type: 'input',
-//         name: "roles_title",
-//         message: "What is the employee's role?",
-//       },  
-//       {
-//         type: 'input',
-//         name: "dept_name",
-//         message: "What is the employee's department?",
-//       },
-//     ]).then((answers) => {
-//       app.post('/api/new-movie', ({ body }, res) => {
-//         const sql = `INSERT INTO employees (first_name, last_name, roles_title, dept_name)
-//           VALUES (?)`;
-//         const param1 = [body.first_name];
-//         const param2 = [body.last_name];
-//         const param3 = [body.roles_title];
-//         const param4 = [body.dept_name];
-        
-//         connection.query(sql, param1, param2, param3, param4, (err, result) => {
-//           if (err) {
-//             res.status(400).json({ error: err.message });
-//             return;
-//           }
-//           res.json({
-//             message: 'success',
-//             data: body
-//           });
-//         });
-//       });
-//       startPrompt();
-//     });
-// }
-
-// // Clicking no on request for employee type will exit function and write files.  
-// // HTML File should take input from these and then write larger HTML file, this will only write the starterHTMl.  Need to get it to apply the answers to the prompts to append to an script.js which will then append data into the generated HTML.  Link included to script.js on HTML file.  Formal in Bootstrap. 
-// const createHTML = () => {
-//   fs.writeFile('./dist/index.html', StartHTML, 'UTF-8', (err) => {
-//     (err) ? console.log(err) : console.log("sucess!")
-//   })
-// }
+//Creates and employee, for the employees table in the database.  takes in first name, last name, role ID and manager ID.  Restarts the initial prompt when complete and.
+const createEmployee = () => {
+  inquirer
+    .prompt([
+      {
+        type: 'input',
+        name: "first_name",
+        message: "What is the employee's first name?",
+      },
+      {
+        type: 'input',
+        name: "last_name",
+        message: "What is the employee's last name?",
+      },
+      {
+        type: 'input',
+        name: "roles_id",
+        message: "What is the Id of the employees role?",
+      },  
+      {
+        type: 'input',
+        name: "manager_id",
+        message: "What is their managers ID from the table?",
+      },
+    ]).then((answers) => {
+      connection.promise().query(`INSERT INTO employees (first_name, last_name, roles_id, manager_id) VALUES (?, ?, ?, ?)`, ([answers.first_name, answers.last_name, answers.roles_id, answers.manager_id])).then(startPrompt())
+    });
+}
 
 
 
-// starts the new member function which will initialize other functions after answering the original question what type of employee.  Clicking no will exit function and write files.  
+
+// starts the new initial  which will initialize other functions after answering the original question what type of employee.  Clicking Exit will exit function and write files.  
 startPrompt();

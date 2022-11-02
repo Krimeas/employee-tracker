@@ -1,2 +1,0 @@
-// sql queries go here.
-
