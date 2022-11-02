@@ -23,7 +23,7 @@ A command line prompt for showing tables and adding to a database for department
 
 ## Usage Instructions
 Link to Video:
-https://drive.google.com/file/d/1hJ8r0bAoWpPLb6scx-kTu2ri7jkaSvMG/view
+https://drive.google.com/file/d/1-W8yBw3ZlX_c7xujfs5y7SM5SZz-4dcw/view
 
 ------------------------------------------------------------
 
